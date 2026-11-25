@@ -138,8 +138,8 @@ end
 -- Main frame
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 260, 0, 360)
-mainFrame.Position = UDim2.new(0.5, -130, 0.5, -180)
+mainFrame.Size = UDim2.new(0, 250, 0, 345)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -172)
 mainFrame.BackgroundColor3 = C.bg
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
@@ -166,8 +166,8 @@ Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10)
 
 -- Bottom of title bar fills corners
 local titleBarFill = Instance.new("Frame")
-titleBarFill.Size = UDim2.new(1, 0, 0, 9)
-titleBarFill.Position = UDim2.new(0, 0, 1, -9)
+titleBarFill.Size = UDim2.new(1, 0, 0, 10)
+titleBarFill.Position = UDim2.new(0, 0, 1, -10)
 titleBarFill.BackgroundColor3 = C.panel
 titleBarFill.BorderSizePixel = 0
 titleBarFill.Parent = titleBar
@@ -208,20 +208,20 @@ makeDraggable(mainFrame, titleBar)
 -- CONTENT AREA
 -- =============================================
 local content = Instance.new("Frame")
-content.Size = UDim2.new(1, -20, 0, 310)
+content.Size = UDim2.new(1, -20, 0, 296)
 content.Position = UDim2.new(0, 10, 0, 44)
 content.BackgroundTransparency = 1
 content.Parent = mainFrame
 
 local contentLayout = Instance.new("UIListLayout", content)
 contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-contentLayout.Padding = UDim.new(0, 6)
+contentLayout.Padding = UDim.new(0, 5)
 
 -- =============================================
 -- STATUS ROW
 -- =============================================
 local statusRow = Instance.new("Frame")
-statusRow.Size = UDim2.new(1, 0, 0, 32)
+statusRow.Size = UDim2.new(1, 0, 0, 30)
 statusRow.BackgroundColor3 = C.panel
 statusRow.BorderSizePixel = 0
 statusRow.LayoutOrder = 1
@@ -251,7 +251,7 @@ statusLabel.Parent = statusRow
 -- TOGGLE BUTTON
 -- =============================================
 local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(1, 0, 0, 38)
+toggleBtn.Size = UDim2.new(1, 0, 0, 36)
 toggleBtn.BackgroundColor3 = C.toggleOff
 toggleBtn.Text = ""
 toggleBtn.BorderSizePixel = 0
@@ -370,7 +370,7 @@ timerLabel.Parent = timerBox
 -- LOG SECTION
 -- =============================================
 local logHeader = Instance.new("TextLabel")
-logHeader.Size = UDim2.new(1, 0, 0, 16)
+logHeader.Size = UDim2.new(1, 0, 0, 14)
 logHeader.BackgroundTransparency = 1
 logHeader.Text = "Activity Log"
 logHeader.TextColor3 = C.textDim
@@ -381,7 +381,7 @@ logHeader.LayoutOrder = 5
 logHeader.Parent = content
 
 local logScroll = Instance.new("ScrollingFrame")
-logScroll.Size = UDim2.new(1, 0, 0, 90)
+logScroll.Size = UDim2.new(1, 0, 0, 105)
 logScroll.BackgroundColor3 = C.logBg
 logScroll.BorderSizePixel = 0
 logScroll.ScrollBarThickness = 3
@@ -408,11 +408,11 @@ logPadding.PaddingTop = UDim.new(0, 4)
 logPadding.PaddingBottom = UDim.new(0, 4)
 
 -- =============================================
--- HIDE BUTTON (small floating pill)
+-- HIDE BUTTON (compact floating pill; stays visible when the main panel is hidden)
 -- =============================================
 local hideBtn = Instance.new("TextButton")
-hideBtn.Size = UDim2.new(0, 76, 0, 28)
-hideBtn.Position = UDim2.new(0.5, -38, 1, -64)
+hideBtn.Size = UDim2.new(0, 66, 0, 25)
+hideBtn.Position = UDim2.new(0.5, -33, 0, 405)
 hideBtn.BackgroundColor3 = C.panel
 hideBtn.Text = "⬆  Hide"
 hideBtn.TextColor3 = C.textDim
@@ -423,14 +423,34 @@ hideBtn.Parent = screenGui
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(0, 20)
 Instance.new("UIStroke", hideBtn).Color = C.border
 
-makeDraggable(hideBtn) -- drag the floating Hide/Show pill anywhere
+makeDraggable(hideBtn)
 
 local guiVisible = true
 
-hideBtn.Activated:Connect(function()
-    guiVisible = not guiVisible
-    mainFrame.Visible = guiVisible
-    hideBtn.Text = guiVisible and "⬆  Hide" or "🦃 Show"
+local hidePressPosition
+
+hideBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        hidePressPosition = input.Position
+    end
+end)
+
+hideBtn.InputEnded:Connect(function(input)
+    if not hidePressPosition then return end
+
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        local moved = (input.Position - hidePressPosition).Magnitude
+        hidePressPosition = nil
+
+        -- Only toggle on a tap/click; dragging the pill just moves it.
+        if moved <= 8 then
+            guiVisible = not guiVisible
+            mainFrame.Visible = guiVisible
+            hideBtn.Text = guiVisible and "⬆  Hide" or "🦃 Show"
+        end
+    end
 end)
 
 -- =============================================
@@ -675,7 +695,7 @@ end
 -- =============================================
 -- TOGGLE BUTTON HANDLER
 -- =============================================
-toggleBtn.Activated:Connect(function()
+toggleBtn.MouseButton1Click:Connect(function()
     isRunning = not isRunning
     setToggleState(isRunning)
 
